@@ -1,0 +1,2 @@
+# Files exempt from the untested-code gate: `path: reason`.
+xtask/src/gates.rs: gate bodies only spawn external tools and run only inside a full gate run

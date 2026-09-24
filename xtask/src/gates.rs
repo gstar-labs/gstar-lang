@@ -2,7 +2,7 @@
 //! lives here.
 
 use crate::proc;
-use crate::{exemptions, manifest, markers, reachability, tools, workspace};
+use crate::{coverage, exemptions, manifest, markers, reachability, tools, workspace};
 use anyhow::bail;
 
 /// Fails if any Rust file is not rustfmt-clean.
@@ -126,4 +126,29 @@ pub fn reachability() -> anyhow::Result<()> {
 pub fn deps() -> anyhow::Result<()> {
     proc::cargo(&["shear"])?;
     proc::cargo(&["deny", "check"])
+}
+
+/// Fails if a first-party function is never entered by an integration test.
+///
+/// # Errors
+/// Returns an error if the coverage run fails, naming every untested function
+/// and every stale exemption.
+pub fn untested_code() -> anyhow::Result<()> {
+    let root = workspace::root()?;
+    let out = root.join("target/untested-code.json");
+    let out_arg = out.to_string_lossy().into_owned();
+    proc::cargo(&["llvm-cov", "clean", "--workspace"])?;
+    proc::cargo(&[
+        "llvm-cov",
+        "nextest",
+        "--workspace",
+        "-E",
+        "kind(test)",
+        "--json",
+        "--output-path",
+        &out_arg,
+    ])?;
+    let json = std::fs::read_to_string(&out)?;
+    let list = std::fs::read_to_string(root.join("xtask/exemptions/untested-code.txt"))?;
+    coverage::check(&json, &root.to_string_lossy(), &exemptions::parse(&list)?)
 }

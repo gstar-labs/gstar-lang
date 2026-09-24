@@ -55,6 +55,14 @@ fn only_absent_tools_are_missing() {
     assert!(missing(&pins, |_| true).is_empty());
 }
 
+/// `missing` is generic over its `present` predicate; `preflight` calls it
+/// with `on_path` specifically, so that instantiation needs its own entry.
+#[test]
+fn missing_with_on_path_finds_a_tool_not_on_path() {
+    let pins = parse_pins(TWO).expect("valid pins");
+    assert_eq!(missing(&pins, on_path), vec!["alpha", "beta"]);
+}
+
 /// A machine may lack tools the maintainer's shell has.
 #[test]
 fn the_message_names_each_missing_tool_with_version_and_install_line() {

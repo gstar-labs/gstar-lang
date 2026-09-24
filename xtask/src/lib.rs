@@ -3,6 +3,7 @@
 //! The registry is the definition of done: `cargo xtask gate` runs every gate,
 //! reports every failure, and exits non-zero if any gate failed.
 
+pub mod coverage;
 pub mod exemptions;
 pub mod gates;
 pub mod manifest;
@@ -41,7 +42,6 @@ pub struct Outcome {
     pub skipped: Vec<&'static str>,
 }
 
-const LATER_IN_SKELETON: &str = "activates later in milestone \"M1 · Skeleton\"";
 const CORE: &str = "activates in milestone \"M1 · Core & Lean syntax\"";
 const STORE: &str = "activates in milestone \"M1 · Surface & store\"";
 const KERNEL: &str = "activates in milestone \"M1 · Kernel & SMT\"";
@@ -89,7 +89,7 @@ pub fn registry() -> Vec<Gate> {
         skip("diagnostics", SPECS),
         skip("stability", BOOK),
         skip("fuzz", INTERP),
-        skip("untested-code", LATER_IN_SKELETON),
+        active("untested-code", gates::untested_code),
         skip("solver-work", BOOK),
     ]
 }

@@ -55,7 +55,6 @@ fn skipped_gates_are_exactly_these() {
             "diagnostics",
             "stability",
             "fuzz",
-            "untested-code",
             "solver-work",
         ]
     );
