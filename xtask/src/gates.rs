@@ -2,7 +2,7 @@
 //! lives here.
 
 use crate::proc;
-use crate::{manifest, markers, tools, workspace};
+use crate::{exemptions, manifest, markers, reachability, tools, workspace};
 use anyhow::bail;
 
 /// Fails if any Rust file is not rustfmt-clean.
@@ -83,4 +83,47 @@ pub fn no_stubs() -> anyhow::Result<()> {
         );
     }
     Ok(())
+}
+
+/// Fails if a workspace crate is not reachable from a product binary.
+///
+/// # Errors
+/// Returns an error naming unreachable crates and stale exemptions.
+pub fn reachability() -> anyhow::Result<()> {
+    let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
+    let members: std::collections::BTreeSet<String> = metadata
+        .workspace_packages()
+        .iter()
+        .map(|p| p.name.to_string())
+        .collect();
+    let edges: std::collections::BTreeMap<String, std::collections::BTreeSet<String>> = metadata
+        .workspace_packages()
+        .iter()
+        .map(|pkg| {
+            let deps = pkg
+                .dependencies
+                .iter()
+                .filter(|d| d.kind != cargo_metadata::DependencyKind::Development)
+                .map(|d| d.name.clone())
+                .filter(|name| members.contains(name))
+                .collect();
+            (pkg.name.to_string(), deps)
+        })
+        .collect();
+    let list = std::fs::read_to_string(
+        metadata
+            .workspace_root
+            .join("xtask/exemptions/reachability.txt"),
+    )?;
+    reachability::check(&edges, reachability::ROOTS, &exemptions::parse(&list)?)
+}
+
+/// Fails on unused dependencies, and on advisories, disallowed licences or
+/// unknown sources.
+///
+/// # Errors
+/// Returns an error if `cargo shear` or `cargo deny check` fails.
+pub fn deps() -> anyhow::Result<()> {
+    proc::cargo(&["shear"])?;
+    proc::cargo(&["deny", "check"])
 }

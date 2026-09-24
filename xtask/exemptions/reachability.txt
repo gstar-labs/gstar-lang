@@ -1,0 +1,2 @@
+# Crates exempt from the reachability gate: `name: reason`.
+xtask: the repository gate runner is a development tool, not part of the product

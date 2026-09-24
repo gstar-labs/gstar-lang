@@ -1,0 +1,18 @@
+[advisories]
+version = 2
+yanked = "deny"
+
+[licenses]
+version = 2
+# Only licences the dependency tree actually uses. A new one is added in the
+# commit that adds the dependency needing it, with a comment naming it.
+allow = ["MIT", "Apache-2.0", "Unicode-3.0"]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

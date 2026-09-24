@@ -45,8 +45,6 @@ fn skipped_gates_are_exactly_these() {
     assert_eq!(
         skipped,
         vec![
-            "reachability",
-            "deps",
             "trusted-base",
             "duplication",
             "core-sync",

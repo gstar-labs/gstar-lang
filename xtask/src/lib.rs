@@ -3,10 +3,12 @@
 //! The registry is the definition of done: `cargo xtask gate` runs every gate,
 //! reports every failure, and exits non-zero if any gate failed.
 
+pub mod exemptions;
 pub mod gates;
 pub mod manifest;
 pub mod markers;
 pub mod proc;
+pub mod reachability;
 pub mod tools;
 pub mod workspace;
 
@@ -74,8 +76,8 @@ pub fn registry() -> Vec<Gate> {
         active("lint", gates::lint),
         active("lint-optin", gates::lint_optin),
         active("no-stubs", gates::no_stubs),
-        skip("reachability", LATER_IN_SKELETON),
-        skip("deps", LATER_IN_SKELETON),
+        active("reachability", gates::reachability),
+        active("deps", gates::deps),
         skip("trusted-base", CORE),
         skip("duplication", STORE),
         skip("core-sync", CORE),
