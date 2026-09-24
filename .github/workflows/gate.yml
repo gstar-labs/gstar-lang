@@ -9,15 +9,21 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: gate-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   gate:
     name: gate
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     env:
-      GH_TOKEN: ${{ github.token }}
       GSTAR_DEPTH: fast
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Branch name
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
@@ -29,8 +35,10 @@ jobs:
           path: |
             ~/.local/gstar-tools
             ~/.elan
-          key: tools-${{ runner.os }}-${{ hashFiles('tools/versions.toml', 'rust-toolchain.toml') }}
+          key: tools-${{ runner.os }}-${{ hashFiles('tools/versions.toml', 'tools/ci-install.sh', 'rust-toolchain.toml') }}
       - name: Install pinned tools
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: bash tools/ci-install.sh
       - name: Gate
         run: cargo xtask gate

@@ -1,31 +1,52 @@
 #!/usr/bin/env bash
 # Installs the external tools pinned in tools/versions.toml (CI only).
-# Versions come from `cargo xtask tool-version`; this script holds no logic.
+# Versions come from `cargo xtask tool-version`; this script holds only install
+# commands. A tool counts as installed only when it is in the tool directory
+# (restored from the cache), never because the runner image has some version.
 set -euo pipefail
-bin="$HOME/.local/gstar-tools/bin"
+shopt -s inherit_errexit nullglob
+root="$HOME/.local/gstar-tools"
+bin="$root/bin"
+elan_bin="$HOME/.elan/bin"
 mkdir -p "$bin"
 echo "$bin" >> "$GITHUB_PATH"
-export PATH="$bin:$PATH"
+echo "$elan_bin" >> "$GITHUB_PATH"
+export PATH="$bin:$elan_bin:$PATH"
 version() { cargo xtask tool-version "$1"; }
 
+# Downloads the single release asset of repository $1, tag $2, matching $3 into
+# a fresh directory, and prints its path.
+fetch() {
+  local dir
+  dir="$(mktemp -d)"
+  gh release download "$2" --repo "$1" --pattern "$3" --dir "$dir"
+  local files=("$dir"/*)
+  if [ "${#files[@]}" -ne 1 ]; then
+    echo "expected one $1 asset matching $3, got ${#files[@]}" >&2
+    return 1
+  fi
+  echo "${files[0]}"
+}
+
 for tool in cargo-nextest cargo-shear cargo-deny cargo-llvm-cov similarity-rs; do
-  if ! command -v "$tool" >/dev/null 2>&1; then
-    cargo install --locked --root "$HOME/.local/gstar-tools" "$tool@$(version "$tool")"
+  if [ ! -x "$bin/$tool" ]; then
+    cargo install --locked --root "$root" "$tool@$(version "$tool")"
   fi
 done
 
-if ! command -v z3 >/dev/null 2>&1; then
-  gh release download "z3-$(version z3)" --repo Z3Prover/z3 --pattern '*x64-glibc*.zip' --dir /tmp/z3
-  unzip -q /tmp/z3/*.zip -d /tmp/z3 && cp /tmp/z3/*/bin/z3 "$bin/"
+if [ ! -x "$bin/z3" ]; then
+  z3_version="$(version z3)"
+  archive="$(fetch Z3Prover/z3 "z3-$z3_version" "z3-$z3_version-x64-glibc-*.zip")"
+  unzip -q -j -o "$archive" '*/bin/z3' -d "$bin"
 fi
 
-if ! command -v cvc5 >/dev/null 2>&1; then
-  gh release download "cvc5-$(version cvc5)" --repo cvc5/cvc5 --pattern '*Linux-x86_64-static.zip' --dir /tmp/cvc5
-  unzip -q /tmp/cvc5/*.zip -d /tmp/cvc5 && cp /tmp/cvc5/*/bin/cvc5 "$bin/"
+if [ ! -x "$bin/cvc5" ]; then
+  archive="$(fetch cvc5/cvc5 "cvc5-$(version cvc5)" 'cvc5-Linux-x86_64-static.zip')"
+  unzip -q -j -o "$archive" '*/bin/cvc5' -d "$bin"
 fi
 
-if ! command -v elan >/dev/null 2>&1; then
-  curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-    | sh -s -- -y --default-toolchain none
-  echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+if [ ! -x "$elan_bin/elan" ]; then
+  archive="$(fetch leanprover/elan "v$(version elan)" 'elan-x86_64-unknown-linux-gnu.tar.gz')"
+  tar -xzf "$archive" -C "$(dirname "$archive")" elan-init
+  "$(dirname "$archive")/elan-init" -y --default-toolchain none
 fi

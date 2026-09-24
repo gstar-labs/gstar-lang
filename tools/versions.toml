@@ -24,7 +24,7 @@ install = "download the static Linux x86-64 build of cvc5 {version} from https:/
 
 [elan]
 version = "4.2.4"
-install = "curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none (elan {version})"
+install = "download elan-x86_64-unknown-linux-gnu.tar.gz from the v{version} release at https://github.com/leanprover/elan/releases, extract it and run `./elan-init -y --default-toolchain none`"
 
 [lake]
 version = "lean-toolchain"
