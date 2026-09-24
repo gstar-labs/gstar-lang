@@ -1,5 +1,7 @@
 //! Functions never entered by an integration test.
 //!
+//! First-party code is the sources under `crates/<name>/src/` and `xtask/src/`.
+//!
 //! Records are grouped by source location. A generic function yields one record
 //! per instantiation, plus zero-count placeholders, so a location counts as
 //! covered when any record for it was entered. Closures are skipped: they are
@@ -38,8 +40,14 @@ pub struct Untested {
     pub name: String,
 }
 
+/// Library and binary sources: `crates/<name>/src/` and `xtask/src/`. Test
+/// files are not first-party code.
 fn first_party(relative: &str) -> bool {
-    relative.starts_with("crates/") || relative.starts_with("xtask/src/")
+    relative.starts_with("xtask/src/")
+        || relative
+            .strip_prefix("crates/")
+            .and_then(|rest| rest.split_once('/'))
+            .is_some_and(|(_, inside)| inside.starts_with("src/"))
 }
 
 /// Checks an llvm-cov JSON export against the workspace at `root`, skipping the

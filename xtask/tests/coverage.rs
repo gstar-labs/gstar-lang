@@ -74,6 +74,24 @@ fn closures_and_foreign_files_are_ignored() {
 }
 
 #[test]
+fn test_files_are_not_first_party() {
+    let json = export(&[
+        record(MAIN, 1, "/r/crates/a/src/main.rs", 1, 1),
+        record(HELPER, 0, "/r/crates/a/tests/version.rs", 3, 1),
+        record(HELPER, 0, "/r/xtask/tests/common/mod.rs", 3, 1),
+        record(HELPER, 0, "/r/crates/src/stray.rs", 3, 1),
+    ]);
+    check(&json, "/r", &none()).expect("only crate and runner sources count");
+}
+
+#[test]
+fn only_test_files_fail_rather_than_passing_vacuously() {
+    let json = export(&[record(HELPER, 1, "/r/crates/a/tests/version.rs", 1, 1)]);
+    let err = check(&json, "/r", &none()).expect_err("vacuous");
+    assert!(format!("{err:#}").contains("vacuously"), "{err:#}");
+}
+
+#[test]
 fn an_exempt_file_is_skipped_and_a_stale_exemption_fails() {
     let json = export(&[
         record(MAIN, 1, "/r/crates/a/src/main.rs", 1, 1),

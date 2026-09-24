@@ -58,6 +58,22 @@ fn a_marker_with_a_reason_exempts_its_line_and_without_one_does_not() {
 }
 
 #[test]
+fn an_allow_marker_with_a_blank_reason_does_not_exempt() {
+    for blank in [
+        "// TODO kept gstar:allow-stub ( )\n",
+        "// TODO kept gstar:allow-stub ()\n",
+    ] {
+        assert_eq!(
+            offending_lines("a.rs", blank, Lang::Rust).len(),
+            1,
+            "{blank}"
+        );
+    }
+    let padded = "// TODO kept gstar:allow-stub ( fixture )\n";
+    assert!(offending_lines("a.rs", padded, Lang::Rust).is_empty());
+}
+
+#[test]
 fn an_allow_marker_inside_a_literal_does_not_exempt_a_marker_outside_it() {
     let src = "let x = \"gstar:allow-stub (ok)\"; // TODO fix this\n";
     assert_eq!(offending_lines("a.rs", src, Lang::Rust).len(), 1);
@@ -118,4 +134,11 @@ fn scan_fails_when_there_is_nothing_to_scan() {
     repo.git(&["init", "-q", "-b", "main"]);
     let err = scan(repo.path()).expect_err("no source files");
     assert!(format!("{err:#}").contains("vacuously"), "{err:#}");
+}
+
+#[test]
+fn this_repository_has_no_unmarked_markers() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+    let hits = scan(&root).expect("scan runs");
+    assert!(hits.is_empty(), "{hits:?}");
 }

@@ -24,7 +24,7 @@ static MARKER: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 static ALLOW: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"gstar:allow-stub \([^)]+\)").expect("the allow pattern is a valid regex")
+    Regex::new(r"gstar:allow-stub \(\s*[^)\s][^)]*\)").expect("the allow pattern is a valid regex")
 });
 
 /// Source languages the scan understands.
@@ -138,6 +138,7 @@ fn blank_quoted(rest: &[char], out: &mut String, open: &str, close: &str, escape
 /// lifetimes, labels and identifiers.
 fn char_literal(rest: &[char], out: &mut String) -> Option<usize> {
     if rest.get(1) == Some(&'\\') {
+        // The quote closing the longest escape, `'\u{10FFFF}'`, is within these 10 chars.
         let close = rest.iter().skip(3).take(10).position(|&c| c == '\'')? + 3;
         out.push('\'');
         out.extend(std::iter::repeat_n(' ', close - 1));
