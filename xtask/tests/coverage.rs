@@ -55,6 +55,15 @@ fn a_zero_count_duplicate_of_an_entered_function_is_covered() {
 }
 
 #[test]
+fn an_entered_function_stays_covered_when_a_zero_count_duplicate_follows() {
+    let json = export(&[
+        record(HELPER, 2, "/r/crates/a/src/lib.rs", 4, 1),
+        record(HELPER, 0, "/r/crates/a/src/lib.rs", 4, 1),
+    ]);
+    check(&json, "/r", &none()).expect("one instance entered");
+}
+
+#[test]
 fn closures_and_foreign_files_are_ignored() {
     let json = export(&[
         record(MAIN, 1, "/r/crates/a/src/main.rs", 1, 1),
