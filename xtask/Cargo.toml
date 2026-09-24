@@ -21,5 +21,6 @@ path = "src/main.rs"
 anyhow = "1.0.104"
 cargo_metadata = "0.23.1"
 clap = { version = "4.6.7", features = ["derive"] }
+regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.1.6"

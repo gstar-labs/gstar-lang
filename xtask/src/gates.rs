@@ -2,7 +2,7 @@
 //! lives here.
 
 use crate::proc;
-use crate::{manifest, tools, workspace};
+use crate::{manifest, markers, tools, workspace};
 use anyhow::bail;
 
 /// Fails if any Rust file is not rustfmt-clean.
@@ -65,4 +65,22 @@ pub fn lint_optin() -> anyhow::Result<()> {
 pub fn test() -> anyhow::Result<()> {
     proc::cargo(&["nextest", "run", "--workspace"])?;
     proc::cargo(&["test", "--workspace", "--doc"])
+}
+
+/// Fails if any source file carries an unmarked unfinished-work marker. The
+/// scan covers the whole tree, not the diff: a diff-only scan would let
+/// anything already present stay forever.
+///
+/// # Errors
+/// Returns an error listing every hit, or if the scan cannot run.
+pub fn no_stubs() -> anyhow::Result<()> {
+    let hits = markers::scan(&workspace::root()?)?;
+    if !hits.is_empty() {
+        bail!(
+            "unfinished-work markers found; finish the work, open a `deferred` issue, \
+             or mark the line with `gstar:allow-stub (reason)`:\n  {}",
+            hits.join("\n  ")
+        );
+    }
+    Ok(())
 }

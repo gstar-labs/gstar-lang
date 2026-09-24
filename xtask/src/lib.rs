@@ -5,6 +5,7 @@
 
 pub mod gates;
 pub mod manifest;
+pub mod markers;
 pub mod proc;
 pub mod tools;
 pub mod workspace;
@@ -72,7 +73,7 @@ pub fn registry() -> Vec<Gate> {
         active("fmt", gates::fmt),
         active("lint", gates::lint),
         active("lint-optin", gates::lint_optin),
-        skip("no-stubs", LATER_IN_SKELETON),
+        active("no-stubs", gates::no_stubs),
         skip("reachability", LATER_IN_SKELETON),
         skip("deps", LATER_IN_SKELETON),
         skip("trusted-base", CORE),
