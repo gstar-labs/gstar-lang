@@ -45,8 +45,6 @@ fn skipped_gates_are_exactly_these() {
     assert_eq!(
         skipped,
         vec![
-            "lint",
-            "lint-optin",
             "no-stubs",
             "reachability",
             "deps",
@@ -54,7 +52,6 @@ fn skipped_gates_are_exactly_these() {
             "duplication",
             "core-sync",
             "semver",
-            "test",
             "lean",
             "difftest",
             "book",

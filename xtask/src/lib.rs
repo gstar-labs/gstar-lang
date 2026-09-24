@@ -4,6 +4,7 @@
 //! reports every failure, and exits non-zero if any gate failed.
 
 pub mod gates;
+pub mod manifest;
 pub mod proc;
 pub mod tools;
 pub mod workspace;
@@ -69,8 +70,8 @@ pub fn registry() -> Vec<Gate> {
     vec![
         active("preflight", gates::preflight),
         active("fmt", gates::fmt),
-        skip("lint", LATER_IN_SKELETON),
-        skip("lint-optin", LATER_IN_SKELETON),
+        active("lint", gates::lint),
+        active("lint-optin", gates::lint_optin),
         skip("no-stubs", LATER_IN_SKELETON),
         skip("reachability", LATER_IN_SKELETON),
         skip("deps", LATER_IN_SKELETON),
@@ -78,7 +79,7 @@ pub fn registry() -> Vec<Gate> {
         skip("duplication", STORE),
         skip("core-sync", CORE),
         skip("semver", RELEASE),
-        skip("test", LATER_IN_SKELETON),
+        active("test", gates::test),
         skip("lean", CORE),
         skip("difftest", KERNEL),
         skip("book", BOOK),
