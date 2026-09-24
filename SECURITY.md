@@ -1,7 +1,7 @@
 # Security and soundness
 
-A **soundness bug** is any case where `gstar check --strict` accepts a program
-that does not meet its written contracts. It is the most serious kind of bug
+A **soundness bug** is any case where the checker accepts a program that does
+not meet its written contracts. It is the most serious kind of bug
 in g-star.
 
 ## Reporting

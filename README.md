@@ -5,20 +5,15 @@
 > **Experimental.** g-star is at its very beginning. Expect breaking changes and
 > missing pieces. Don't use it for anything that matters yet.
 
-g-star is being designed so that a program an agent writes is either proved to
-meet its written contracts, or rejected with a machine-readable reason: a
-replayed counterexample, an unproven obligation, or a precise error. Programs
-live in a content-addressed store of nodes that git can diff at the node level.
-Types are dependent and refined, and proof obligations go to SMT solvers. The
-core calculus is formalized in Lean.
+Design goal: a program an agent writes is either proved to meet its written
+contracts, or rejected with a machine-readable reason.
 
 ## What exists today
 
+Only what is listed here works:
+
 - The `gstar` command-line tool, which reports its version.
 - The repository gate (`cargo xtask gate`): the definition of done for every change.
-
-Everything else (the store, the checker, the interpreter and the book) is
-still ahead. Each piece will be listed here once it works.
 
 ## Building from source
 

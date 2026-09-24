@@ -33,5 +33,4 @@ release planning, and internal validation narratives out of them.
 
 ## Releasing
 
-The maintainer creates release tags. The release notes are the marked section
-of `CHANGELOG.md`.
+Release tags are created by the maintainer.
