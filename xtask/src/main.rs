@@ -20,6 +20,11 @@ enum Command {
         #[arg(long)]
         list: bool,
     },
+    /// Print the pinned version of an external tool (used by CI).
+    ToolVersion {
+        /// The tool's executable name, as keyed in `tools/versions.toml`.
+        name: String,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -33,6 +38,14 @@ fn main() -> anyhow::Result<()> {
                 return Ok(());
             }
             xtask::run_gates(&gates, only.as_deref()).map(drop)
+        }
+        Command::ToolVersion { name } => {
+            let pins = xtask::tools::load_pins(&xtask::workspace::root()?)?;
+            let Some(pin) = pins.get(&name) else {
+                anyhow::bail!("tool `{name}` is not pinned in tools/versions.toml");
+            };
+            println!("{}", pin.version);
+            Ok(())
         }
     }
 }

@@ -45,7 +45,6 @@ fn skipped_gates_are_exactly_these() {
     assert_eq!(
         skipped,
         vec![
-            "preflight",
             "lint",
             "lint-optin",
             "no-stubs",

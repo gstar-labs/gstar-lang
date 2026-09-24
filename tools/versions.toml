@@ -1,0 +1,39 @@
+# External tools the gates need. CI installs exactly these versions.
+# `cargo xtask gate --only preflight` checks that each one is on PATH and
+# prints its install line when it is not. `{version}` is filled in.
+
+[cargo-deny]
+version = "0.20.2"
+install = "cargo install --locked cargo-deny@{version}"
+
+[cargo-llvm-cov]
+version = "0.9.1"
+install = "cargo install --locked cargo-llvm-cov@{version}"
+
+[cargo-nextest]
+version = "0.9.146"
+install = "cargo install --locked cargo-nextest@{version}"
+
+[cargo-shear]
+version = "1.11.2"
+install = "cargo install --locked cargo-shear@{version}"
+
+[cvc5]
+version = "1.4.0"
+install = "download the static Linux x86-64 build of cvc5 {version} from https://github.com/cvc5/cvc5/releases and put `cvc5` on PATH"
+
+[elan]
+version = "4.2.4"
+install = "curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none (elan {version})"
+
+[lake]
+version = "lean-toolchain"
+install = "installed by elan; the Lean version is pinned by lean/lean-toolchain"
+
+[similarity-rs]
+version = "0.5.0"
+install = "cargo install --locked similarity-rs@{version}"
+
+[z3]
+version = "4.16.0"
+install = "download the Linux x86-64 build of z3 {version} from https://github.com/Z3Prover/z3/releases and put `z3` on PATH"

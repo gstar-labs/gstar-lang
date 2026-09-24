@@ -39,3 +39,17 @@ fn a_skipped_gate_named_with_only_exits_non_zero() {
     assert!(!out.status.success(), "{out:?}");
     assert!(String::from_utf8_lossy(&out.stderr).contains("not active yet"));
 }
+
+#[test]
+fn tool_version_prints_the_pin() {
+    let out = xtask(&["tool-version", "z3"]);
+    assert!(out.status.success(), "{out:?}");
+    assert_eq!(String::from_utf8_lossy(&out.stdout).trim(), "4.16.0");
+}
+
+#[test]
+fn tool_version_of_an_unpinned_tool_fails() {
+    let out = xtask(&["tool-version", "no-such-tool"]);
+    assert!(!out.status.success(), "{out:?}");
+    assert!(String::from_utf8_lossy(&out.stderr).contains("not pinned"));
+}

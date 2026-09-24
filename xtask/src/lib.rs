@@ -5,6 +5,8 @@
 
 pub mod gates;
 pub mod proc;
+pub mod tools;
+pub mod workspace;
 
 use anyhow::bail;
 
@@ -65,7 +67,7 @@ fn skip(name: &'static str, reason: &'static str) -> Gate {
 #[must_use]
 pub fn registry() -> Vec<Gate> {
     vec![
-        skip("preflight", LATER_IN_SKELETON),
+        active("preflight", gates::preflight),
         active("fmt", gates::fmt),
         skip("lint", LATER_IN_SKELETON),
         skip("lint-optin", LATER_IN_SKELETON),
