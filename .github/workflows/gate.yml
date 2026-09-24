@@ -27,8 +27,8 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
-            $HOME/.local/gstar-tools
-            $HOME/.elan
+            ~/.local/gstar-tools
+            ~/.elan
           key: tools-${{ runner.os }}-${{ hashFiles('tools/versions.toml', 'rust-toolchain.toml') }}
       - name: Install pinned tools
         run: bash tools/ci-install.sh
