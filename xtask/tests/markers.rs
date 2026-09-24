@@ -58,6 +58,12 @@ fn a_marker_with_a_reason_exempts_its_line_and_without_one_does_not() {
 }
 
 #[test]
+fn an_allow_marker_inside_a_literal_does_not_exempt_a_marker_outside_it() {
+    let src = "let x = \"gstar:allow-stub (ok)\"; // TODO fix this\n";
+    assert_eq!(offending_lines("a.rs", src, Lang::Rust).len(), 1);
+}
+
+#[test]
 fn toml_and_lean_literals_and_comments_are_understood() {
     assert!(
         offending_lines("a.toml", "k = \"TODO\"\nm = '''\nFIXME\n'''\n", Lang::Toml).is_empty()

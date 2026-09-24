@@ -244,7 +244,7 @@ pub fn offending_lines(path: &str, source: &str, lang: Lang) -> Vec<String> {
         .lines()
         .zip(source.lines())
         .enumerate()
-        .filter(|(_, (scanned, original))| MARKER.is_match(scanned) && !ALLOW.is_match(original))
+        .filter(|(_, (scanned, _))| MARKER.is_match(scanned) && !ALLOW.is_match(scanned))
         .map(|(index, (_, original))| format!("{path}:{}: {}", index + 1, original.trim()))
         .collect()
 }
