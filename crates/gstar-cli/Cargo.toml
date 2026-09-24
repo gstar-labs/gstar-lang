@@ -1,0 +1,18 @@
+[package]
+name = "gstar-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "The g-star toolchain command-line interface"
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "gstar"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
