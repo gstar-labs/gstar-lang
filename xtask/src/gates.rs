@@ -91,31 +91,16 @@ pub fn no_stubs() -> anyhow::Result<()> {
 /// Returns an error naming unreachable crates and stale exemptions.
 pub fn reachability() -> anyhow::Result<()> {
     let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
-    let members: std::collections::BTreeSet<String> = metadata
-        .workspace_packages()
-        .iter()
-        .map(|p| p.name.to_string())
-        .collect();
-    let edges: std::collections::BTreeMap<String, std::collections::BTreeSet<String>> = metadata
-        .workspace_packages()
-        .iter()
-        .map(|pkg| {
-            let deps = pkg
-                .dependencies
-                .iter()
-                .filter(|d| d.kind != cargo_metadata::DependencyKind::Development)
-                .map(|d| d.name.clone())
-                .filter(|name| members.contains(name))
-                .collect();
-            (pkg.name.to_string(), deps)
-        })
-        .collect();
     let list = std::fs::read_to_string(
         metadata
             .workspace_root
             .join("xtask/exemptions/reachability.txt"),
     )?;
-    reachability::check(&edges, reachability::ROOTS, &exemptions::parse(&list)?)
+    reachability::check(
+        &reachability::edges(&metadata),
+        reachability::ROOTS,
+        &exemptions::parse(&list)?,
+    )
 }
 
 /// Fails on unused dependencies, and on advisories, disallowed licences or

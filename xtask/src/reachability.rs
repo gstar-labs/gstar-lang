@@ -2,10 +2,38 @@
 //! normal or build dependencies. Dev-dependencies don't count as wiring.
 
 use anyhow::bail;
+use cargo_metadata::{DependencyKind, Metadata};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 /// The product binaries every crate must be reachable from.
 pub const ROOTS: &[&str] = &["gstar-cli", "gstar-mcp"];
+
+/// The dependency graph between workspace members: each member maps to the
+/// members it depends on through normal or build dependencies.
+/// Dev-dependencies are dropped, and so are dependencies outside the
+/// workspace. Every member is a key, even one with no edges.
+#[must_use]
+pub fn edges(metadata: &Metadata) -> BTreeMap<String, BTreeSet<String>> {
+    let members: BTreeSet<String> = metadata
+        .workspace_packages()
+        .iter()
+        .map(|pkg| pkg.name.to_string())
+        .collect();
+    metadata
+        .workspace_packages()
+        .iter()
+        .map(|pkg| {
+            let deps = pkg
+                .dependencies
+                .iter()
+                .filter(|dep| dep.kind != DependencyKind::Development)
+                .map(|dep| dep.name.clone())
+                .filter(|name| members.contains(name))
+                .collect();
+            (pkg.name.to_string(), deps)
+        })
+        .collect()
+}
 
 /// Checks `edges` (member → members it depends on) against `roots` and
 /// `exemptions`.
