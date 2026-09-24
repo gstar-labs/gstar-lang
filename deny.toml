@@ -6,6 +6,8 @@ yanked = "deny"
 version = 2
 # Only licences the dependency tree actually uses. A new one is added in the
 # commit that adds the dependency needing it, with a comment naming it.
+# MIT, Apache-2.0: the project's own licence (MIT OR Apache-2.0) and most dependencies.
+# Unicode-3.0: unicode-ident.
 allow = ["MIT", "Apache-2.0", "Unicode-3.0"]
 
 [bans]
