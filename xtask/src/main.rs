@@ -25,6 +25,11 @@ enum Command {
         /// The tool's executable name, as keyed in `tools/versions.toml`.
         name: String,
     },
+    /// Check a pull-request branch name (used by CI).
+    BranchName {
+        /// The branch name.
+        name: String,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -45,6 +50,15 @@ fn main() -> anyhow::Result<()> {
                 anyhow::bail!("tool `{name}` is not pinned in tools/versions.toml");
             };
             println!("{}", pin.version);
+            Ok(())
+        }
+        Command::BranchName { name } => {
+            if !xtask::branch::allowed(&name) {
+                anyhow::bail!(
+                    "branch `{name}` must start with one of {:?}",
+                    xtask::branch::PREFIXES
+                );
+            }
             Ok(())
         }
     }

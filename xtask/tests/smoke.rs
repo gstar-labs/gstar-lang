@@ -53,3 +53,15 @@ fn tool_version_of_an_unpinned_tool_fails() {
     assert!(!out.status.success(), "{out:?}");
     assert!(String::from_utf8_lossy(&out.stderr).contains("not pinned"));
 }
+
+#[test]
+fn branch_name_accepts_a_prefixed_branch() {
+    assert!(xtask(&["branch-name", "feat/x"]).status.success());
+}
+
+#[test]
+fn branch_name_rejects_and_lists_the_prefixes() {
+    let out = xtask(&["branch-name", "wip"]);
+    assert!(!out.status.success(), "{out:?}");
+    assert!(String::from_utf8_lossy(&out.stderr).contains("feat/"));
+}

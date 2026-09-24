@@ -3,6 +3,7 @@
 //! The registry is the definition of done: `cargo xtask gate` runs every gate,
 //! reports every failure, and exits non-zero if any gate failed.
 
+pub mod branch;
 pub mod coverage;
 pub mod exemptions;
 pub mod gates;
