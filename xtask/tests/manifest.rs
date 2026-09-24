@@ -13,6 +13,7 @@ unsafe_code = "forbid"
 [workspace.lints.clippy]
 all = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
+allow_attributes_without_reason = "deny"
 "#;
 
 #[test]
@@ -35,6 +36,30 @@ fn an_entry_lowered_to_warn_is_reported() {
     assert_eq!(
         weakened_policy(&text).expect("valid"),
         vec!["rust.missing_docs"]
+    );
+}
+
+#[test]
+fn unsafe_code_lowered_to_deny_is_reported() {
+    let text = WHOLE.replace("unsafe_code = \"forbid\"", "unsafe_code = \"deny\"");
+    assert_eq!(
+        weakened_policy(&text).expect("valid"),
+        vec!["rust.unsafe_code"]
+    );
+}
+
+#[test]
+fn a_deny_entry_raised_to_forbid_still_counts() {
+    let text = WHOLE.replace("dead_code = \"deny\"", "dead_code = \"forbid\"");
+    assert!(weakened_policy(&text).expect("valid").is_empty());
+}
+
+#[test]
+fn a_missing_reason_requirement_is_reported() {
+    let text = WHOLE.replace("allow_attributes_without_reason = \"deny\"\n", "");
+    assert_eq!(
+        weakened_policy(&text).expect("valid"),
+        vec!["clippy.allow_attributes_without_reason"]
     );
 }
 

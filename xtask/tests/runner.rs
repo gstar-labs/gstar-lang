@@ -1,8 +1,10 @@
 //! `run_gates` with fake gates. Each test has its own counters, because gate
 //! bodies are `fn` pointers and cannot capture.
 
-// Fake gates must match `fn() -> anyhow::Result<()>` even when they cannot fail.
-#![allow(clippy::unnecessary_wraps)]
+#![allow(
+    clippy::unnecessary_wraps,
+    reason = "fake gates must match `fn() -> anyhow::Result<()>` even when they cannot fail"
+)]
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 use xtask::{Check, Gate, Outcome, run_gates};

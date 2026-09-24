@@ -18,7 +18,8 @@ fn workspace(repo: &Scratch, pedantic: &str, member_opts_in: bool) {
         &format!(
             "[workspace]\nresolver = \"3\"\nmembers = [\"a\"]\n\n{RUST_POLICY}\n\
              [workspace.lints.clippy]\nall = {{ level = \"deny\", priority = -1 }}\n\
-             pedantic = {{ level = \"{pedantic}\", priority = -1 }}\n"
+             pedantic = {{ level = \"{pedantic}\", priority = -1 }}\n\
+             allow_attributes_without_reason = \"deny\"\n"
         ),
     );
     let lints = if member_opts_in {

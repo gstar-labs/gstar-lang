@@ -1,7 +1,9 @@
 //! Helpers shared by the integration tests.
 
-// Each test binary uses a different subset of these helpers.
-#![allow(dead_code)]
+#![allow(
+    dead_code,
+    reason = "each test binary uses a different subset of these helpers"
+)]
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};

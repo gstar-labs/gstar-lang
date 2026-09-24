@@ -3,29 +3,34 @@
 use anyhow::{Context as _, bail};
 use std::path::Path;
 
-/// Lints the workspace policy must set to `deny` or `forbid`, as
-/// `(table, lint)` under `[workspace.lints]`.
-pub const REQUIRED: &[(&str, &str)] = &[
-    ("rust", "dead_code"),
-    ("rust", "unreachable_pub"),
-    ("rust", "missing_docs"),
-    ("rust", "unused"),
-    ("rust", "unsafe_code"),
-    ("clippy", "all"),
-    ("clippy", "pedantic"),
+/// The lints the workspace policy must set, as `(table, lint, minimum level)`
+/// under `[workspace.lints]`. A `deny` minimum is also met by `forbid`; a
+/// `forbid` minimum is met only by `forbid`, so no crate can lift it.
+pub const REQUIRED: &[(&str, &str, &str)] = &[
+    ("rust", "dead_code", "deny"),
+    ("rust", "unreachable_pub", "deny"),
+    ("rust", "missing_docs", "deny"),
+    ("rust", "unused", "deny"),
+    ("rust", "unsafe_code", "forbid"),
+    ("clippy", "all", "deny"),
+    ("clippy", "pedantic", "deny"),
+    ("clippy", "allow_attributes_without_reason", "deny"),
 ];
 
-fn is_strict(value: Option<&toml::Value>) -> bool {
+fn meets(value: Option<&toml::Value>, minimum: &str) -> bool {
     let level = match value {
         Some(toml::Value::String(level)) => Some(level.as_str()),
         Some(toml::Value::Table(table)) => table.get("level").and_then(toml::Value::as_str),
         _ => None,
     };
-    matches!(level, Some("deny" | "forbid"))
+    match minimum {
+        "forbid" => level == Some("forbid"),
+        _ => matches!(level, Some("deny" | "forbid")),
+    }
 }
 
-/// The [`REQUIRED`] entries that `workspace_manifest` does not set to `deny` or
-/// `forbid`, as `table.lint`.
+/// The [`REQUIRED`] entries that `workspace_manifest` does not set to at least
+/// their minimum level, as `table.lint`.
 ///
 /// # Errors
 /// Returns an error if the manifest is not valid TOML.
@@ -36,10 +41,13 @@ pub fn weakened_policy(workspace_manifest: &str) -> anyhow::Result<Vec<String>> 
     let lints = doc.get("workspace").and_then(|w| w.get("lints"));
     Ok(REQUIRED
         .iter()
-        .filter(|(table, lint)| {
-            !is_strict(lints.and_then(|l| l.get(*table)).and_then(|t| t.get(*lint)))
+        .filter(|(table, lint, minimum)| {
+            !meets(
+                lints.and_then(|l| l.get(*table)).and_then(|t| t.get(*lint)),
+                minimum,
+            )
         })
-        .map(|(table, lint)| format!("{table}.{lint}"))
+        .map(|(table, lint, _)| format!("{table}.{lint}"))
         .collect())
 }
 
@@ -70,7 +78,7 @@ pub fn check_workspace(
 ) -> anyhow::Result<()> {
     let weakened = weakened_policy(workspace_manifest)?;
     if !weakened.is_empty() {
-        bail!("workspace lint policy weakened (each must be deny or forbid): {weakened:?}");
+        bail!("workspace lint policy weakened below its required levels: {weakened:?}");
     }
     if members.is_empty() {
         bail!("no workspace members; the check would pass vacuously");

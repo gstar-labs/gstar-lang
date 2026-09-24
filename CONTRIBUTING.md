@@ -20,7 +20,7 @@ gates in order. A gate marked SKIP names the milestone in which it activates.
   issue labelled `deferred`. In the rare genuine exception, mark the line
   `gstar:allow-stub (reason)`.
 - Strict lints: clippy `all` and `pedantic` are errors, and every `allow`
-  carries a comment explaining why.
+  states why in its `reason = "…"`.
 - Every function is reached by an integration test.
 - No unused dependencies. A dependency lands in the change that first uses it.
 - Tests are deterministic: no sleeps.
